@@ -1,0 +1,114 @@
+1) oldest users in victoria
+Code:
+
+SELECT TOP 10
+Id as [User Link],
+DisplayName,
+Age,
+Location,
+'http://stackoverflow.com/users/' + CAST(Id AS VARCHAR) AS Url
+FROM
+Users
+WHERE
+Location like N'Victoria, BC, Canada%' 
+ORDER BY
+Age DESC
+
+Results: (name, age)
+
+1. Eric O, 69
+2. blueinc spatial, 58
+3. AutomatonTec, 57
+4. yyyguy, 51
+5. Shrawan, 50
+6. Lee Hammond, 49
+7. ravenshill, 48
+8. rmm, 48
+9. Brad BARCLAY, 44
+10. Jonathon Watney, 40
+
+
+2. Top 10 highest reputation users in Victoria
+Code:
+
+SELECT TOP 10 
+    ROW_NUMBER() OVER(ORDER BY Reputation DESC) AS [#], 
+    Location,
+    Id AS [User Link], 
+    Reputation
+FROM
+ Users
+WHERE
+Location like '%Victoria, Canada%'
+ AND Reputation >= 5000
+ORDER BY
+Reputation DESC;
+
+Results: (name, reputation)
+1. womp, 95361
+2. zombat, 68674
+3. Cary Swoveland, 56121
+4. Manfred Moser, 22391
+5. Peter, 19667
+6. Dave Jarvis, 19040
+7. Ryley, 17330
+8. Zac Thompson, 10100
+9. Bryan Kyle, 9054
+10. jason, 7878
+
+3.Top 5 Victoria developers by answer %
+
+code:
+SELECT TOP ##MaxUsers?5##
+        a.OwnerUserId AS [User Link],
+        Count(a.Id) AS [Total Answers],
+        Sum(CASE q.AcceptedAnswerId WHEN a.Id THEN 1 ELSE 0 END) AS [Accepted Answers],  
+        Round(Sum(CASE q.AcceptedAnswerId WHEN a.Id THEN 1 ELSE 0 END) * 100.0 / Count(a.Id), 2) AS [Percentage Accepted],
+        Round(CAST(Sum(CASE q.AcceptedAnswerId WHEN a.Id THEN 1 ELSE 0 END) AS FLOAT) * (CAST(Sum(CASE q.AcceptedAnswerId WHEN a.Id THEN 1 ELSE 0 END) AS FLOAT) / Count(a.Id)), 2) AS Weighting
+FROM    Posts AS a
+   JOIN Posts AS q
+     ON a.ParentId = q.Id
+WHERE
+        q.postTypeId = 1
+    AND a.postTypeId = 2
+GROUP BY
+        a.OwnerUserId
+ORDER BY
+        PercentageAccepted DESC
+
+Result:
+
+	1. nemesv 90.82%
+	2. Alive to Die 89%
+ 	3. Stephen Muecke 83.69%
+	4. Luksprog 81.32%
+	5. Martin R 81.01%
+
+4. Top 10 Victoria developers by accepted answer percentage on questions with the tag javascript
+
+Code:
+SELECT TOP 10 
+ Users.Id,
+ Users.DisplayName, 
+ Users.Location, 
+ ROUND((CAST(SUM(CASE WHEN a.Id=q.AcceptedAnswerId THEN 1 ELSE 0 END) AS float) / COUNT(a.Id)) * 100, 1) AS AcceptedAnswerPercentage 
+ FROM Users 
+ JOIN Posts a ON a.OwnerUserId = Users.Id and a.PostTypeId = 2 
+ JOIN Posts q ON a.ParentId = q.Id 
+ WHERE Users.Location = 'Victoria, BC' 
+ AND q.Tags LIKE '%javascript%' 
+ GROUP BY Users.Id, Users.DisplayName, Users.Location 
+ ORDER BY [AcceptedAnswerPercentage] DESC
+
+ Results:
+
+ 1. Yokel Pole, 100
+ 2. brandonscript, 43
+ 3. logan, 28.6
+ 4. Romanulus, 20
+ 5. Tristan, 0
+ 6. corygibbons, 0
+ 7. Aliweb, 0
+ 8. Matt Eff, 0
+ 9.Kluny, 0
+ 10.Eric, 0
